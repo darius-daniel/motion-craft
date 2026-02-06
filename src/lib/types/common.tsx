@@ -1,10 +1,12 @@
+import type React from 'react';
+
 export type AnimationState = 'idle' | 'animating' | 'complete';
 
 export interface BaseAnimationProps extends React.HTMLAttributes<HTMLElement> {
   as?: React.ElementType;
   children?: React.ReactNode;
-  duration?: number; // in milliseconds
-  delay?: number; // in milliseconds
+  duration?: number; // How long it takes the animation from start to finish (ms)
+  delay?: number; // How long it takes the animation to start from component load (ms)
   timingFunction?:
     | 'ease'
     | 'ease-in'
@@ -16,6 +18,7 @@ export interface BaseAnimationProps extends React.HTMLAttributes<HTMLElement> {
   onAnimationComplete?: () => void; // Callback when animation completes
   respectMotionPreference?: boolean;
   styles?: React.CSSProperties;
+  ref?: React.RefObject<HTMLElement | null>;
 }
 
 export const EASING_PRESETS = {

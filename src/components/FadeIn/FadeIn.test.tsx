@@ -85,8 +85,8 @@ test('Applies custom className', () => {
   const { container } = render(
     <FadeIn className="custom-class">Test Content</FadeIn>
   );
-  const element = container.firstChild as HTMLElement;
-  expect(element.className).toContain('custom-class');
+  const element = container.firstElementChild;
+  expect(element?.className).toContain('custom-class');
 });
 
 test('Respects delay prop', async () => {

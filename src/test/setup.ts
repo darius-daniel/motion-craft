@@ -15,3 +15,17 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 });
+
+// Mock Web Animation API
+Object.defineProperty(Element.prototype, 'animate', {
+  writable: true,
+  value: vi.fn().mockImplementation(() => ({
+    cancel: vi.fn(),
+    finish: vi.fn(),
+    pause: vi.fn(),
+    play: vi.fn(),
+    reverse: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  })),
+});
