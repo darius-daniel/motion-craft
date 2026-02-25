@@ -8,19 +8,55 @@ import {
   prefersReducedMotion,
 } from '../../lib/utils/animation';
 
+/**
+ * Props for the FadeIn animation component
+ * @interface FadeInProps
+ * @extends {BaseAnimationProps}
+ *
+ * @property {number} [from=0] - Initial opacity value (0-1)
+ * @property {number} [to=1] - Final opacity value (0-1)
+ */
 export interface FadeInProps extends BaseAnimationProps {
-  /** Initial and final opacity respectively (0-1) */
   from?: number;
   to?: number;
 }
 
 /**
- * FadeIn - Animates opacity from 0 to 1
+ * FadeIn - A component that animates opacity from one value to another
+ *
+ * This component provides a smooth fade-in animation with support for:
+ * - Customizable duration and delay
+ * - Accessibility (respects prefers-reduced-motion)
+ * - Custom timing functions
+ * - Completion callbacks
+ * - Ref forwarding
+ *
+ * @component
+ * @param {FadeInProps} props - Component props
+ * @param {React.Ref<HTMLElement>} ref - Forwarded ref to the animated element
  *
  * @example
  * ```tsx
- * <FadeIn duration={500} delay={200}>
+ * // Basic usage
+ * <FadeIn>
  *   <div>Hello World</div>
+ * </FadeIn>
+ *
+ * // With custom props
+ * <FadeIn
+ *   duration={500}
+ *   delay={200}
+ *   from={0}
+ *   to={1}
+ *   timingFunction="ease-out"
+ *   onAnimationComplete={() => console.log('Done!')}
+ * >
+ *   <div>Animated Content</div>
+ * </FadeIn>
+ *
+ * // As a different element
+ * <FadeIn as="section" className="hero">
+ *   <h1>Hero Title</h1>
  * </FadeIn>
  * ```
  */

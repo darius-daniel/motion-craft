@@ -10,23 +10,43 @@ import {
 } from '../../lib/utils/animation';
 import { mergeRefs } from '../../lib/utils/refs';
 
+/**
+ * Direction from which the element slides into view
+ * @typedef {'fromTop' | 'fromRight' | 'fromBottom' | 'fromLeft'} SlideDirection
+ */
 export type SlideDirection =
   | 'fromTop'
   | 'fromRight'
   | 'fromBottom'
   | 'fromLeft';
 
+/**
+ * Props for the SlideIn animation component
+ * @interface SlideInProps
+ * @extends {BaseAnimationProps}
+ *
+ * @property {SlideDirection} [slideDirection='fromTop'] - Direction from which to slide in
+ * @property {boolean} [fade=false] - Whether to fade in while sliding
+ * @property {number} [distance=30] - Distance to slide in pixels
+ */
 export interface SlideInProps extends BaseAnimationProps {
-  slideDirection?: SlideDirection; // direction to slide in from
-  fade?: boolean; // Whether to fade in while sliding in
-  distance?: number; // distance to slide (px)
+  slideDirection?: SlideDirection;
+  fade?: boolean;
+  distance?: number;
 }
 
 /**
+ * Calculates the initial CSS transform for the slide animation
  *
- * @param slideDirection Direction to slide the component from
- * @param distance Distance to slide the component (px)
- * @returns transform for the initial animation keyframe
+ * @param {SlideDirection} slideDirection - Direction from which to slide
+ * @param {number} distance - Distance to slide in pixels
+ * @returns {string} CSS transform value for the initial state
+ *
+ * @example
+ * ```tsx
+ * getInitialTransform('fromTop', 30) // Returns: "translateY(-30px)"
+ * getInitialTransform('fromLeft', 50) // Returns: "translateX(-50px)"
+ * ```
  */
 const getInitialTransform = (
   slideDirection: SlideDirection,
@@ -45,37 +65,63 @@ const getInitialTransform = (
 };
 
 /**
- * getFinalTransform - generates the transform for the final state of the animation keyframe
- * @param slideDirection Direction to slide the component from
- * @returns final transform for the animation keyframe
+ * Calculates the final CSS transform for the slide animation (resting position)
+ *
+ * @param {SlideDirection} slideDirection - Direction from which element slid
+ * @returns {string} CSS transform value for the final state (always returns to origin)
+ *
+ * @example
+ * ```tsx
+ * getFinalTransform('fromTop') // Returns: "translateY(0)"
+ * getFinalTransform('fromLeft') // Returns: "translateX(0)"
+ * ```
  */
-export const getFinalTransform = (slideDirection: SlideDirection) => {
+export const getFinalTransform = (slideDirection: SlideDirection): string => {
   return slideDirection.endsWith('Top') || slideDirection.endsWith('Bottom')
     ? 'translateY(0)'
     : 'translateX(0)';
 };
 
 /**
- * SlideIn - slides an element or component into view
+ * SlideIn - A component that slides an element into view from a specified direction
  *
- * @param as
- * @param className
- * @param children
- * @param slideDirection
- * @param distance
- * @param duration
- * @param delay
- * @param timingFunction
- * @param onAnimationComplete
- * @param respectMotionPreference
- * @param style
- * @param ref
- * @param fade
+ * This component uses the Web Animations API to create smooth slide-in effects with support for:
+ * - Four slide directions (top, right, bottom, left)
+ * - Optional fade effect during slide
+ * - Customizable distance, duration, and timing
+ * - Accessibility (respects prefers-reduced-motion)
+ * - Ref forwarding
+ * - Completion callbacks
+ *
+ * @component
+ * @param {SlideInProps} props - Component props
  *
  * @example
  * ```tsx
- * <SlideIn duration={500} delay={200}>
+ * // Basic usage
+ * <SlideIn>
  *   <div>Hello World</div>
+ * </SlideIn>
+ *
+ * // Slide from right with fade
+ * <SlideIn slideDirection="fromRight" fade distance={50}>
+ *   <div>Animated Content</div>
+ * </SlideIn>
+ *
+ * // With custom timing
+ * <SlideIn
+ *   slideDirection="fromBottom"
+ *   duration={500}
+ *   delay={200}
+ *   timingFunction="ease-out"
+ *   onAnimationComplete={() => console.log('Done!')}
+ * >
+ *   <div>Content</div>
+ * </SlideIn>
+ *
+ * // As a different element
+ * <SlideIn as="section" className="card">
+ *   <h2>Card Title</h2>
  * </SlideIn>
  * ```
  */
