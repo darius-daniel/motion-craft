@@ -8,6 +8,14 @@ import type React from 'react';
  * @property {string} complete - Animation has finished
  */
 export type AnimationState = 'idle' | 'animating' | 'complete';
+export type CSSTimingFunction =
+  | 'ease'
+  | 'ease-in'
+  | 'ease-out'
+  | 'ease-in-out'
+  | 'linear'
+  | 'step-start'
+  | 'step-end';
 
 /**
  * Base props interface for all animation components
@@ -39,14 +47,7 @@ export interface BaseAnimationProps extends React.HTMLAttributes<HTMLElement> {
   children?: React.ReactNode;
   duration?: number;
   delay?: number;
-  timingFunction?:
-    | 'ease'
-    | 'ease-in'
-    | 'ease-out'
-    | 'ease-in-out'
-    | 'linear'
-    | 'step-start'
-    | 'step-end';
+  timingFunction?: CSSTimingFunction;
   onAnimationComplete?: () => void;
   respectMotionPreference?: boolean;
   styles?: React.CSSProperties;

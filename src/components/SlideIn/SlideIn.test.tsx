@@ -92,6 +92,17 @@ const slideDirections: SlideDirection[] = [
 ];
 slideDirections.forEach(direction => {
   test(`slideDirection: ${direction}`, () => {
+    vi.mocked(window.matchMedia).mockReturnValue({
+      matches: true,
+      media: '(prefers-reduced-motion: reduce)',
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    } as any);
+
     const { container } = render(
       <SlideIn slideDirection={direction} respectMotionPreference>
         Test Content

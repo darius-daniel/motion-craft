@@ -1,13 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import type {
-  AnimationState,
-  BaseAnimationProps,
-} from '../../lib/types/common';
+import React, { useMemo } from 'react';
+import type { BaseAnimationProps } from '../../lib/types/common';
 import { mergeRefs } from '../../lib/utils/refs';
-import {
-  prefersReducedMotion,
-  scheduleAnimationComplete,
-} from '../../lib/utils/animation';
+import useAnimation from '../../hooks/useAnimation';
 
 /**
  * Props for the ScaleIn animation component
@@ -110,65 +104,29 @@ export default function ScaleIn({
   ref,
   ...props
 }: ScaleInProps) {
-  const internalRef = useRef<HTMLElement>(null);
-  const timerRef = useRef<number | null>(null);
-  const [animationState, setAnimationState] = useState<AnimationState>('idle');
-
-  useEffect(() => {
-    if (prefersReducedMotion() && respectMotionPreference) {
-      setAnimationState('complete');
-      onAnimationComplete?.();
-      return;
-    }
-
-    setAnimationState('animating');
-    const animation = internalRef.current?.animate(
-      [
-        {
-          transform: `scale(${scaleFrom})`,
-          transformOrigin,
-          opacity: fade ? 0 : 1,
-        },
-        { transform: `scale(${scaleTo})`, transformOrigin, opacity: 1 },
-      ],
+  const keyframes = useMemo(
+    () => [
       {
-        delay,
-        duration,
-        direction: 'normal',
-        easing: timingFunction,
-        fill: 'forwards',
-      }
-    );
+        transform: `scale(${scaleFrom})`,
+        transformOrigin,
+        opacity: fade ? 0 : 1,
+      },
+      { transform: `scale(${scaleTo})`, transformOrigin, opacity: 1 },
+    ],
+    [fade, scaleFrom, scaleTo, transformOrigin]
+  );
 
-    scheduleAnimationComplete(
-      timerRef,
-      duration,
-      delay,
-      onAnimationComplete,
-      setAnimationState
-    );
-
-    return () => {
-      animation?.cancel();
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [
-    duration,
+  const { animationState, elementRef: internalRef } = useAnimation({
     delay,
-    scaleTo,
-    scaleFrom,
-    transformOrigin,
-    fade,
-    timingFunction,
+    duration,
+    keyframes,
     respectMotionPreference,
+    timingFunction,
     onAnimationComplete,
-  ]);
+  });
 
   const mergedRef = mergeRefs(ref, internalRef);
 
-  // Apply initial styles before animation starts, or final styles when animation is skipped
   const initialStyles =
     animationState === 'idle'
       ? {
@@ -176,7 +134,13 @@ export default function ScaleIn({
           transformOrigin,
           opacity: fade ? 0 : 1,
         }
-      : {};
+      : animationState === 'complete'
+        ? {
+            transform: `scale(${scaleTo})`,
+            transformOrigin,
+            opacity: 1,
+          }
+        : {};
 
   return React.createElement(
     Component,

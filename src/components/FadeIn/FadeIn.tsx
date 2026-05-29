@@ -1,12 +1,10 @@
-import React, { useEffect, useRef, useState, type CSSProperties } from 'react';
-import type {
-  AnimationState,
-  BaseAnimationProps,
-} from '../../lib/types/common';
+import React, { useMemo, type CSSProperties } from 'react';
+import type { BaseAnimationProps } from '../../lib/types/common';
 import {
   generateTransition,
   prefersReducedMotion,
 } from '../../lib/utils/animation';
+import useAnimation from '../../hooks/useAnimation';
 
 /**
  * Props for the FadeIn animation component
@@ -78,10 +76,15 @@ export const FadeIn = React.forwardRef<HTMLElement, FadeInProps>(
     },
     ref
   ) => {
-    const [animationState, setAnimationState] =
-      useState<AnimationState>('idle');
-    const elementRef = useRef<HTMLElement>(null);
-    const timerRef = useRef<number | null>(null);
+    const keyframes = useMemo(() => [], []);
+    const { elementRef, animationState } = useAnimation({
+      keyframes,
+      delay,
+      duration,
+      respectMotionPreference,
+      timingFunction,
+      onAnimationComplete,
+    });
 
     // Merge refs
     const mergedRef = (node: HTMLElement | null) => {
@@ -92,30 +95,6 @@ export const FadeIn = React.forwardRef<HTMLElement, FadeInProps>(
         (ref as React.RefObject<HTMLElement | null>).current = node;
       }
     };
-
-    useEffect(() => {
-      // Skip animation if user prefers reduced motion
-      if (respectMotionPreference && prefersReducedMotion()) {
-        setAnimationState('complete');
-        onAnimationComplete?.();
-        return;
-      }
-
-      // Start animation
-      setAnimationState('animating');
-
-      // Complete animation after duration + delay
-      timerRef.current = setTimeout(() => {
-        setAnimationState('complete');
-        onAnimationComplete?.();
-      }, duration + delay);
-
-      return () => {
-        if (timerRef.current) {
-          clearTimeout(timerRef.current);
-        }
-      };
-    }, [duration, delay, respectMotionPreference, onAnimationComplete]);
 
     const shouldAnimate = respectMotionPreference
       ? !prefersReducedMotion()

@@ -1,14 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  type AnimationState,
-  type BaseAnimationProps,
-} from '../../lib/types/common';
-import {
-  prefersReducedMotion,
-  scheduleAnimationComplete,
-  shouldSkipAnimation,
-} from '../../lib/utils/animation';
+import { type BaseAnimationProps } from '../../lib/types/common';
 import { mergeRefs } from '../../lib/utils/refs';
+import useAnimation from '../../hooks/useAnimation';
+import React, { useMemo } from 'react';
 
 /**
  * Direction from which the element slides into view
@@ -141,60 +134,25 @@ export default function SlideIn({
   fade,
   ...props
 }: SlideInProps) {
-  const internalRef = useRef<HTMLElement>(null);
-  const timerRef = useRef<number | null>(null);
-  const [animationState, setAnimationState] = useState<AnimationState>('idle');
-
-  useEffect(() => {
-    // Skip animation if user prefers reduced motion
-    if (shouldSkipAnimation(respectMotionPreference, prefersReducedMotion())) {
-      setAnimationState('complete');
-      onAnimationComplete?.();
-      return;
-    }
-
-    setAnimationState('animating');
-    const animation = internalRef.current?.animate(
-      [
-        {
-          transform: getInitialTransform(slideDirection, distance),
-          opacity: fade ? 0 : 1,
-        },
-        { transform: getFinalTransform(slideDirection), opacity: 1 },
-      ],
+  const keyframes = useMemo(
+    () => [
       {
-        delay,
-        duration,
-        direction: 'normal',
-        easing: timingFunction,
-        fill: 'forwards',
-      }
-    );
+        transform: getInitialTransform(slideDirection, distance),
+        opacity: fade ? 0 : 1,
+      },
+      { transform: getFinalTransform(slideDirection), opacity: 1 },
+    ],
+    [slideDirection, distance, fade]
+  );
 
-    scheduleAnimationComplete(
-      timerRef,
-      duration,
-      delay,
-      onAnimationComplete,
-      setAnimationState
-    );
-
-    return () => {
-      animation?.cancel();
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [
-    duration,
+  const { animationState, elementRef: internalRef } = useAnimation({
+    keyframes,
     delay,
-    distance,
-    slideDirection,
-    fade,
-    timingFunction,
+    duration,
     respectMotionPreference,
+    timingFunction,
     onAnimationComplete,
-  ]);
+  });
 
   const mergedRef = mergeRefs(ref, internalRef);
 
